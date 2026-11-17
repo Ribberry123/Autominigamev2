@@ -73,8 +73,8 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Player = Players.LocalPlayer
 
-local TriggerAmount = 50 --ตัั้งจำนวนที่ต้องการให้ซื้อของใหม่เมื่อเหลือน้อยกว่า 
-local MaxAmount = 2000 --ตั้งจำนวนสูงสุดที่ต้องการให้ซื้อของใหม่
+local TriggerAmount = 500 --ตัั้งจำนวนที่ต้องการให้ซื้อของใหม่เมื่อเหลือน้อยกว่า 
+local MaxAmount = 1000 --ตั้งจำนวนสูงสุดที่ต้องการให้ซื้อของใหม่
 local MaxBuy = 99
 
 local CountText = Player.PlayerGui.BagHUD.QuickBar.Quick2.Count
@@ -108,22 +108,13 @@ local function MountWhale()
 
     task.wait(1)
 
-    local Whale = workspace.Whales:WaitForChild(TargetWhaleName)
+    local Whale = workspace.Whales:WaitForChild("Whale_9165275719")
 
-    for i = 10, 10 do
+    local Prompt = Whale:FindFirstChildWhichIsA("ProximityPrompt", true)
 
-        local Seat = Whale:FindFirstChild("Seat" .. i)
-
-        if Seat and Seat.Occupant == nil then
-
-            local Prompt = Seat:FindFirstChild("MountPrompt")
-
-            if Prompt then
-                fireproximityprompt(Prompt)
-                print("Mount Seat" .. i)
-            end
-        end
-    end
+    if Prompt then
+        fireproximityprompt(Prompt)
+     end
 
     task.wait(1)
 
@@ -193,7 +184,7 @@ while true do
 
         local CurrentWeight = tonumber(Weight.Text:match("([%d%.]+)"))
 
-        if CurrentWeight and CurrentWeight >= 900 then
+        if CurrentWeight and CurrentWeight >= 634 then
 
             print(true)
 
@@ -243,27 +234,14 @@ while true do
             Character:WaitForChild("HumanoidRootPart").CFrame =
                 TargetWhale:GetPivot()
 
-            task.wait(1)
+            task.wait(2)
 
-            local Whale = workspace.Whales:WaitForChild(TargetWhaleName)
+            local Whale = workspace.Whales:WaitForChild("Whale_9165275719")
 
-            for i = 1, 10 do
+            local Prompt = Whale:FindFirstChildWhichIsA("ProximityPrompt", true)
 
-                if GetAmount() < TriggerAmount then
-                    break
-                end
-
-                local Seat = Whale:FindFirstChild("Seat" .. i)
-
-                if Seat and Seat.Occupant == nil then
-
-                    local Prompt = Seat:FindFirstChild("MountPrompt")
-
-                    if Prompt then
-                        fireproximityprompt(Prompt)
-                        print("Mount Seat" .. i)
-                    end
-                end
+            if Prompt then
+                fireproximityprompt(Prompt)
             end
 
             task.wait(1)
