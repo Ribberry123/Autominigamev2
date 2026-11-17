@@ -110,7 +110,7 @@ local function MountWhale()
 
     local Whale = workspace.Whales:WaitForChild(TargetWhaleName)
 
-    for i = 3, 10 do
+    for i = 10, 10 do
 
         local Seat = Whale:FindFirstChild("Seat" .. i)
 
