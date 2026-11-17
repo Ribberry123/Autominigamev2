@@ -84,7 +84,7 @@ local TargetPosition = Vector3.new(
     -2600.107421875, 10.04726505279541, 2690.837158203125
 )
 
-local TargetWhaleName = "Whale_1200036690"
+local TargetWhaleName = "Whale_9165275719"
 
 Player.Idled:Connect(function()
     VirtualUser:CaptureController()
@@ -110,7 +110,7 @@ local function MountWhale()
 
     local Whale = workspace.Whales:WaitForChild(TargetWhaleName)
 
-    for i = 1, 10 do
+    for i = 3, 10 do
 
         local Seat = Whale:FindFirstChild("Seat" .. i)
 
