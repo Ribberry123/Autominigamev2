@@ -1,0 +1,287 @@
+local VirtualInputManager = game:GetService("VirtualInputManager")
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+
+local playerGui = player:WaitForChild("PlayerGui")
+local handFishHUD = playerGui:WaitForChild("HandFishHUD")
+local card = handFishHUD:WaitForChild("Card")
+
+local barElement = card:GetChildren()[6]:GetChildren()[6]
+local triangleElement = card:GetChildren()[6]:WaitForChild("TextLabel")
+
+
+local function pressSpaceBar()
+    VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Space, false, game)
+    task.wait(0.05)
+    VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Space, false, game)
+end
+
+local function isColliding(gui1, gui2)
+    local pos1, size1 = gui1.AbsolutePosition, gui1.AbsoluteSize
+    local pos2, size2 = gui2.AbsolutePosition, gui2.AbsoluteSize
+
+    return (pos1.X < pos2.X + size2.X) and
+           (pos1.X + size1.X > pos2.X) and
+           (pos1.Y < pos2.Y + size2.Y) and
+           (pos1.Y + size1.Y > pos2.Y)
+end
+
+local lastPressTime = 0
+local cooldownTime = 0.3
+local pressCount = 0
+local wasEnabled = false
+
+task.spawn(function()
+    while true do
+        task.wait()
+        
+        if handFishHUD.Enabled then
+            if not wasEnabled then
+                pressCount = 0
+                wasEnabled = true
+            end
+            
+            if pressCount < 3 then
+                if barElement and triangleElement and barElement.Parent and triangleElement.Parent then
+                    if isColliding(barElement, triangleElement) then
+                        local currentTime = tick()
+                        
+                        if currentTime - lastPressTime >= cooldownTime then
+                            pressSpaceBar()
+                            pressCount = pressCount + 1
+                            lastPressTime = currentTime
+                            
+                        end
+                    end
+                end
+            end
+        else
+            if wasEnabled then
+                wasEnabled = false
+                pressCount = 0
+            end
+            task.wait(0.5)
+        end
+    end
+end)
+
+
+
+local VirtualUser = game:GetService("VirtualUser")
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local Player = Players.LocalPlayer
+
+local TriggerAmount = 50 --ตัั้งจำนวนที่ต้องการให้ซื้อของใหม่เมื่อเหลือน้อยกว่า 
+local MaxAmount = 2000 --ตั้งจำนวนสูงสุดที่ต้องการให้ซื้อของใหม่
+local MaxBuy = 99
+
+local CountText = Player.PlayerGui.BagHUD.QuickBar.Quick2.Count
+local Weight = Player.PlayerGui.BagModalHUD.PanelClip.Panel.Weight
+
+local TargetPosition = Vector3.new(
+    -2600.107421875, 10.04726505279541, 2690.837158203125
+)
+
+local TargetWhaleName = "Whale_9165275719"
+
+Player.Idled:Connect(function()
+    VirtualUser:CaptureController()
+    VirtualUser:ClickButton2(Vector2.new())
+end)
+
+local function GetAmount()
+    local Text = CountText.Text
+    local Number = Text:match("x([%d,]+)")
+
+    return tonumber(Number and Number:gsub(",", "")) or 0
+end
+local function MountWhale()
+
+    local TargetWhale = workspace.Whales:WaitForChild(TargetWhaleName)
+
+    local Character = Player.Character or Player.CharacterAdded:Wait()
+
+    Character:WaitForChild("HumanoidRootPart").CFrame =
+        TargetWhale:GetPivot()
+
+    task.wait(1)
+
+    local Whale = workspace.Whales:WaitForChild(TargetWhaleName)
+
+    for i = 1, 10 do
+
+        local Seat = Whale:FindFirstChild("Seat" .. i)
+
+        if Seat and Seat.Occupant == nil then
+
+            local Prompt = Seat:FindFirstChild("MountPrompt")
+
+            if Prompt then
+                fireproximityprompt(Prompt)
+                print("Mount Seat" .. i)
+            end
+        end
+    end
+
+    task.wait(1)
+
+    local Target = Player.PlayerGui.FishingHUD.Fishing.Idle.Prompt
+
+    for _, connection in pairs(getconnections(Target.Activated)) do
+        connection:Fire()
+    end
+
+    print("Whale Mounted - Fishing Started")
+end
+
+local function RefillItems()
+
+    print("Amount below 500 - Stopping main script")
+
+    local WarpArgs = {
+        [1] = "warp",
+        [2] = "deepisle"
+    }
+
+    ReplicatedStorage.VipRemotes.Event:FireServer(unpack(WarpArgs))
+
+    task.wait(2)
+
+    while GetAmount() < MaxAmount do
+
+        local CurrentAmount = GetAmount()
+        local Remaining = MaxAmount - CurrentAmount
+        local BuyAmount = math.min(Remaining, MaxBuy)
+
+        local BuyArgs = {
+            [1] = "mart",
+            [2] = 3,
+            [3] = BuyAmount
+        }
+
+        ReplicatedStorage.ShopRemotes.Buy:InvokeServer(unpack(BuyArgs))
+
+        task.wait(0.3)
+
+        local NewAmount = GetAmount()
+
+        print("Before:", CurrentAmount, "| After:", NewAmount)
+
+        if NewAmount <= CurrentAmount then
+            task.wait(1)
+        end
+    end
+
+    print("Purchase Completed! Amount:", GetAmount())
+
+    MountWhale()
+
+    task.wait(1)
+end
+
+task.wait(1)
+
+while true do
+
+    if GetAmount() < TriggerAmount then
+
+        RefillItems()
+
+    else
+
+        local CurrentWeight = tonumber(Weight.Text:match("([%d%.]+)"))
+
+        if CurrentWeight and CurrentWeight >= 650 then
+
+            print(true)
+
+            local Character = Player.Character or Player.CharacterAdded:Wait()
+            local Humanoid = Character:WaitForChild("Humanoid")
+
+            Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+
+            Humanoid:MoveTo(TargetPosition)
+
+            local Finished = false
+
+            local Connection = Humanoid.MoveToFinished:Connect(function()
+                Finished = true
+            end)
+
+            while not Finished do
+
+                if GetAmount() < TriggerAmount then
+                    break
+                end
+
+                Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+
+                task.wait(math.random(10, 30) / 10)
+            end
+
+            Connection:Disconnect()
+
+            if GetAmount() < TriggerAmount then
+                continue
+            end
+
+            task.wait(2)
+
+            ReplicatedStorage:WaitForChild("ShopRemotes"):WaitForChild("Sell"):InvokeServer(
+                "mystery_fish",
+                "all"
+            )
+
+            task.wait(1)
+
+            local TargetWhale = workspace.Whales:WaitForChild(TargetWhaleName)
+
+            Character = Player.Character or Player.CharacterAdded:Wait()
+
+            Character:WaitForChild("HumanoidRootPart").CFrame =
+                TargetWhale:GetPivot()
+
+            task.wait(1)
+
+            local Whale = workspace.Whales:WaitForChild(TargetWhaleName)
+
+            for i = 1, 10 do
+
+                if GetAmount() < TriggerAmount then
+                    break
+                end
+
+                local Seat = Whale:FindFirstChild("Seat" .. i)
+
+                if Seat and Seat.Occupant == nil then
+
+                    local Prompt = Seat:FindFirstChild("MountPrompt")
+
+                    if Prompt then
+                        fireproximityprompt(Prompt)
+                        print("Mount Seat" .. i)
+                    end
+                end
+            end
+
+            task.wait(1)
+
+            if GetAmount() >= TriggerAmount then
+
+                local Target = Player.PlayerGui.FishingHUD.Fishing.Idle.Prompt
+
+                for _, connection in pairs(getconnections(Target.Activated)) do
+                    connection:Fire()
+                end
+            end
+
+        else
+
+            print(false)
+            task.wait(1)
+
+        end
+    end
+end
