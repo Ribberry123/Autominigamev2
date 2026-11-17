@@ -73,8 +73,8 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Player = Players.LocalPlayer
 
-local TriggerAmount = 500 --ตัั้งจำนวนที่ต้องการให้ซื้อของใหม่เมื่อเหลือน้อยกว่า 
-local MaxAmount = 1000 --ตั้งจำนวนสูงสุดที่ต้องการให้ซื้อของใหม่
+local TriggerAmount = 50 --ตัั้งจำนวนที่ต้องการให้ซื้อของใหม่เมื่อเหลือน้อยกว่า 
+local MaxAmount = 2000 --ตั้งจำนวนสูงสุดที่ต้องการให้ซื้อของใหม่
 local MaxBuy = 99
 
 local CountText = Player.PlayerGui.BagHUD.QuickBar.Quick2.Count
@@ -184,7 +184,7 @@ while true do
 
         local CurrentWeight = tonumber(Weight.Text:match("([%d%.]+)"))
 
-        if CurrentWeight and CurrentWeight >= 634 then
+        if CurrentWeight and CurrentWeight >= 910 then
 
             print(true)
 
