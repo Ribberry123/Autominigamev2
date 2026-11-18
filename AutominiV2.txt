@@ -184,7 +184,7 @@ while true do
 
         local CurrentWeight = tonumber(Weight.Text:match("([%d%.]+)"))
 
-        if CurrentWeight and CurrentWeight >= 1240 then
+        if CurrentWeight and CurrentWeight >= 115 then
 
             print(true)
 
